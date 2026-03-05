@@ -1,0 +1,61 @@
+version: '3.8'
+
+networks:
+  turnos_prod_net:
+    driver: bridge # Red privada aislada
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: turnos_db_prod
+    environment:
+      POSTGRES_USER: prod_user
+      POSTGRES_PASSWORD: prod_password
+      POSTGRES_DB: turnos_db_prod
+    # SIN PUERTOS EXPUESTOS: Seguridad por aislamiento de red, solo los contenedores dentro de `turnos_prod_net` pueden ver la DB.
+    networks:
+      - turnos_prod_net
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U prod_user -d turnos_db_prod" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  backend:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile # Usa el Dockerfile estático
+    container_name: turnos_backend_prod
+    ports:
+      - "3000:3000"
+    networks:
+      - turnos_prod_net
+    environment:
+      - DATABASE_URL=postgresql://prod_user:prod_password@db:5432/turnos_db_prod
+      - NODE_ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: Dockerfile # Usa el Nginx Dockerfile multi-stage
+      args:
+        - VITE_API_URL=https://tu-api.turnospro.com/api # Tu endpoint real de producción
+    container_name: turnos_frontend_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - turnos_prod_net
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  pgdata_prod:

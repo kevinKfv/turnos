@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# The node_modules might be overridden by volume so we make sure package.json is here to install
+COPY package*.json ./
+RUN npm install
+
+# Copiamos el resto de src (Aunque el volumen pisará esto sirbe de fallback)
+COPY . .
+
+# Exponemos el puerto de vite
+EXPOSE 5173
+
+# Corremos vite en modo HOST (Para que acepte conexiones del exterior de docker)
+CMD ["npm", "run", "dev", "--", "--host"]

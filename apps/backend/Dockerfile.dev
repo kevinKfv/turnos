@@ -1,0 +1,20 @@
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Archivos de la dependencia global TS
+RUN npm install -g ts-node typescript nodemon
+
+# Copiar configuración basica para instalar modulos
+COPY package*.json ./
+RUN npm install
+
+# Copiamos código (Aunque el volumen de ../apps/backend lo sobreescribe en DEV)
+COPY . .
+
+# Exponemos el puerto de express
+EXPOSE 3000
+
+# Corremos la aplicación utilizando nodemon o ts-node
+CMD ["npm", "run", "dev"]
