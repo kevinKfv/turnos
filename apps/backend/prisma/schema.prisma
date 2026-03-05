@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PROFESIONAL
+  CLIENTE
+}
+
+enum EstadoTurno {
+  PENDIENTE
+  CONFIRMADO
+  CANCELADO
+}
+
+model User {
+  id               Int           @id @default(autoincrement())
+  nombre           String
+  email            String        @unique
+  password         String
+  telefono         String
+  role             Role          @default(CLIENTE)
+  precioConsulta   Float?
+  diasLaborables   String?
+  horaInicio       String?
+  horaFin          String?
+  
+  turnosCliente     Appointment[] @relation("ClienteAppointments")
+  turnosProfesional Appointment[] @relation("ProfesionalAppointments")
+  historialCliente  Historial[]   @relation("HistorialCliente")
+  historialProf     Historial[]   @relation("HistorialProfesional")
+}
+
+model Appointment {
+  id            Int         @id @default(autoincrement())
+  fechaHora     DateTime
+  precio        Float
+  pagado        Boolean     @default(false)
+  estado        EstadoTurno @default(PENDIENTE)
+  
+  clienteId     Int
+  profesionalId Int
+  
+  cliente       User        @relation("ClienteAppointments", fields: [clienteId], references: [id])
+  profesional   User        @relation("ProfesionalAppointments", fields: [profesionalId], references: [id])
+  historial     Historial[]
+}
+
+model Historial {
+  id            Int         @id @default(autoincrement())
+  notas         String
+  fecha         DateTime    @default(now())
+  
+  clienteId     Int
+  profesionalId Int
+  appointmentId Int
+  
+  cliente       User        @relation("HistorialCliente", fields: [clienteId], references: [id])
+  profesional   User        @relation("HistorialProfesional", fields: [profesionalId], references: [id])
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+}
