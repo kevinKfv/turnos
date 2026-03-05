@@ -30,11 +30,14 @@ if (process.env.SENTRY_DSN) {
 }
 // 2. Configuración Estricta de CORS
 const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? ['https://turnospro.com', 'https://www.turnospro.com', process.env.VITE_API_URL || '', 'http://localhost']
+    ? ['https://turnospro.com', 'https://www.turnospro.com', process.env.VITE_API_URL || '', process.env.FRONTEND_URL || '', 'http://localhost']
     : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else if (origin && origin.endsWith('.up.railway.app')) {
             callback(null, true);
         }
         else {
