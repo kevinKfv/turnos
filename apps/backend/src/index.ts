@@ -2,7 +2,7 @@
 import app from './app';
 import * as reminderCron from './cron/reminderCron';
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT as number, '0.0.0.0', () => {
     console.log(`🚀 Servidor backend corriendo en puerto ${PORT}`);
     // Iniciar cron jobs
     (0, reminderCron.startReminderCron)();
