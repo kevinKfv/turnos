@@ -36,12 +36,25 @@ const allowedOrigins = [
     'https://frontend-production-9715.up.railway.app',
     'http://localhost:5173',
     'http://localhost:3000'
-].filter(Boolean) as string[];
+].filter(Boolean).map(url => url?.replace(/\/$/, '')); // Remove trailing slashes
 
 app.use(cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Remove trailing slash from incoming origin just in case
+        const cleanOrigin = origin.replace(/\/$/, '');
+
+        if (allowedOrigins.indexOf(cleanOrigin) !== -1 || allowedOrigins.some(ao => cleanOrigin.includes(ao as string))) {
+            callback(null, true);
+        } else {
+            console.error(`CORS Blocked: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
     credentials: true,
 }));
 
