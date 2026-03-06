@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import express_rate_limit from 'express-rate-limit';
-const Sentry = __importStar(require("@sentry/node"));
+import * as Sentry from '@sentry/node';
 import * as profiling_node from '@sentry/profiling-node';
 import * as errorHandler from './middlewares/errorHandler';
 import authRoutes from './routes/authRoutes';
