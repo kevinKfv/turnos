@@ -22,6 +22,9 @@ if (process.env.SENTRY_DSN) {
         profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
     });
 }
+// Trust proxy is needed for express-rate-limit behind Railway
+app.set('trust proxy', 1);
+
 // 1. Seguridad de Cabeceras HTTP
 app.use(helmet());
 // Sentry Request Handler (Debe ser el primer middleware después de la seguridad base y antes del body parser)
