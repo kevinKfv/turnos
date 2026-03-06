@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import express_rate_limit from 'express-rate-limit';
 import * as Sentry from '@sentry/node';
-import * as profiling_node from '@sentry/profiling-node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import * as errorHandler from './middlewares/errorHandler';
 import authRoutes from './routes/authRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
@@ -16,7 +16,7 @@ if (process.env.SENTRY_DSN) {
     Sentry.init({
         dsn: process.env.SENTRY_DSN,
         integrations: [
-            (0, profiling_node.nodeProfilingIntegration)(),
+            nodeProfilingIntegration(),
         ],
         tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
         profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
