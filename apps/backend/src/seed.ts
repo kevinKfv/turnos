@@ -13,7 +13,7 @@ import bcrypt from 'bcrypt';
 const prisma = new client.PrismaClient();
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const hash = yield bcrypt.default.hash('admin123', 10);
+        const hash = yield bcrypt.hash('admin123', 10);
         const admin = yield prisma.user.upsert({
             where: { email: 'admin@turnos.com' },
             update: {},
@@ -34,7 +34,7 @@ function main() {
             { nombre: 'Dra. María Gómez', email: 'maria.gomez@turnos.com', telefono: '+5491100000002' }
         ];
         for (const p of profesionales) {
-            const pHash = yield bcrypt.default.hash('profesional123', 10);
+            const pHash = yield bcrypt.hash('profesional123', 10);
             yield prisma.user.upsert({
                 where: { email: p.email },
                 update: {
