@@ -28,9 +28,15 @@ app.use(helmet());
 if (process.env.SENTRY_DSN) {
     Sentry.setupExpressErrorHandler(app);
 }
-// 2. Configuración Estricta de CORS
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'https://frontend-production-9715.up.railway.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+].filter(Boolean) as string[];
+
 app.use(cors({
-    origin: '*', // Temporalmente permitir todo para aislar el error
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,

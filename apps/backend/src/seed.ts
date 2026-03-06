@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import * as client from '@prisma/client';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 const prisma = new client.PrismaClient();
+
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const hash = yield bcrypt.hash('admin123', 10);
