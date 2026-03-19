@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  services    Service[]
+  staff       Staff[]
+  customers   Customer[]
+  appointments Appointment[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  BUSINESS_OWNER
+  STAFF
+  CUSTOMER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
+  staffProfile Staff?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  name        String
+  description String?
+  duration    Int
+  price       Float
+  isOnline    Boolean  @default(true)
+  
+  appointments Appointment[]
+  staff       Staff[]  @relation("StaffServices")
+}
+
+model Staff {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  workingHours Json
+  
+  services    Service[] @relation("StaffServices")
+  appointments Appointment[]
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  email       String
+  phone       String?
+  name        String
+  notes       String?
+  noShows     Int      @default(0)
+  
+  appointments Appointment[]
+  
+  @@unique([tenantId, email])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  NO_SHOW
+  COMPLETED
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  staffId     String
+  staff       Staff    @relation(fields: [staffId], references: [id])
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+  
+  startTime   DateTime
+  endTime     DateTime
+  status      AppointmentStatus @default(PENDING)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
